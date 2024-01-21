@@ -1,9 +1,24 @@
 # Запуск:
 
+2 варианта запуска:
+
+1. Через конфиг WebTLO:
+
 ```shell
-banner.exe tlo_config /var/www/webtlo/src/data/config.ini --ban_list=ban_list.txt
+./banner tlo_config /var/www/webtlo/src/data/config.ini --ban_list=ban_list.txt
 ```
 
 Параметры:
  * `tlo_config` - обязательно, после этого указать путь к файлу конфига webTLO
+ * `--ban_list=ban_list.txt` - путь к файлу со списком клиентов, которых необходимо банить, ищется подстрокой, без учёта регистра
+
+2. Через параметры соединения qBittorrent:
+```shell
+banner.exe qbittorrent 127.0.0.1:1339 --user=admin --pass=password --ban_list=ban_list.txt 
+```
+
+Параметры:
+ * `qbittorrent` - обязательно, после этого сервер для подключения в формате `сервер:порт`
+ * `--user` - если используется аутентификация, имя пользователя
+ * `--pass` - если используется аутентификация, пароль
  * `--ban_list=ban_list.txt` - путь к файлу со списком клиентов, которых необходимо банить, ищется подстрокой, без учёта регистра

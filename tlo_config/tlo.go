@@ -1,4 +1,4 @@
-package main
+package tlo_config
 
 import (
 	"gopkg.in/ini.v1"
