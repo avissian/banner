@@ -12,12 +12,6 @@ import (
 	"strings"
 )
 
-type LiteTorrent struct {
-	Magnet   string
-	SavePath string
-	Name     string
-}
-
 func Connect(user string, pass string, server string, port uint32, SSL bool) (client *qbt.Client) {
 	scheme := "http"
 	if SSL {
@@ -28,12 +22,6 @@ func Connect(user string, pass string, server string, port uint32, SSL bool) (cl
 	if err := client.Login(lo); err != nil {
 		log.Panicln(err)
 	}
-	//ver, err := client.BuildInfo()
-	//if err != nil {
-	//		log.Panicln(err)
-	//}
-	//log.Printf("Connected (%s:%d): %#v", server, port, ver)
-
 	return
 }
 
@@ -106,7 +94,6 @@ func ban(login string, pass string, host string, port uint32, ssl bool, ip2ban [
 		if err != nil {
 			log.Printf("ERROR: %#v", err)
 		}
-		log.Printf("Banned: %v", ip2ban)
 	}
 }
 
@@ -126,6 +113,9 @@ func tloConfig(path string, banPath string) {
 	for _, clientCfg := range tlo.Clients {
 		ban(clientCfg.Login, clientCfg.Pass, clientCfg.Host, clientCfg.Port, clientCfg.SSL, ip2ban)
 	}
+	if len(ip2ban) > 0 {
+		log.Printf("Banned: %v", ip2ban)
+	}
 }
 
 var (
@@ -141,7 +131,7 @@ var (
 	SSL                 = clientParamsCommand.Flag("ssl", "SSL/TLS (https), default: no SSL/TLS (http)").Bool()
 	//
 	banList   = kingpin.Flag("ban_list", "Путь к файлу списка подстрок для бана клиентов").Short('b').Required().File()
-	trafLimit = kingpin.Flag("traff", "Коэффициент превышения скачивания раздачи над её размером для бана пира").Default("1.1").Float64()
+	trafLimit = kingpin.Flag("traff", "Коэффициент превышения скачивания раздачи над её размером для бана пира").Default("0").Float64()
 	verbose   = kingpin.Flag("verbose", "Подробный вывод лога").Short('v').Bool()
 )
 
@@ -164,8 +154,11 @@ func main() {
 			portI, _ := strconv.Atoi(serverParams[1])
 			port = uint32(portI)
 		}
-		ban(*user, *pass, host, port, *SSL,
-			getStrangePeers(*user, *pass, host, port, *SSL, (*banList).Name()))
+		ip2ban := getStrangePeers(*user, *pass, host, port, *SSL, (*banList).Name())
+		ban(*user, *pass, host, port, *SSL, ip2ban)
+		if len(ip2ban) > 0 {
+			log.Printf("Banned: %v", ip2ban)
+		}
 	default:
 		log.Panicln("Unknown command")
 	}
